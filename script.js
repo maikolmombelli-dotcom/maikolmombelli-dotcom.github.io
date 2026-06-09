@@ -36,16 +36,33 @@ document.addEventListener('DOMContentLoaded', function () {
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
-  // Lightbox for project screenshots.
+  // Infinite marquees: clone each track's items so the loop is seamless.
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('[data-marquee]').forEach(function (marquee) {
+    var track = marquee.querySelector('.marquee-track');
+    if (!track) return;
+    if (marquee.dataset.duration) {
+      track.style.setProperty('--marquee-duration', marquee.dataset.duration + 's');
+    }
+    if (reduceMotion) return; // keep one set; CSS turns the strip into a manual scroll
+    Array.prototype.slice.call(track.children).forEach(function (node) {
+      var clone = node.cloneNode(true);
+      clone.setAttribute('aria-hidden', 'true');
+      clone.classList.add('is-clone');
+      track.appendChild(clone);
+    });
+  });
+
+  // Lightbox for project screenshots (delegated so cloned marquee slides work too).
   var lb = document.getElementById('lightbox');
   var lbImg = document.getElementById('lbImg');
   if (lb && lbImg) {
-    document.querySelectorAll('.shot img').forEach(function (img) {
-      img.addEventListener('click', function () {
-        lbImg.src = img.src;
-        lbImg.alt = img.alt;
-        lb.classList.add('open');
-      });
+    document.addEventListener('click', function (e) {
+      var img = e.target.closest && e.target.closest('.shot img');
+      if (!img) return;
+      lbImg.src = img.src;
+      lbImg.alt = img.alt;
+      lb.classList.add('open');
     });
 
     var closeLb = function () { lb.classList.remove('open'); };
