@@ -37,14 +37,12 @@ document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
   // Infinite marquees: clone each track's items so the loop is seamless.
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('[data-marquee]').forEach(function (marquee) {
     var track = marquee.querySelector('.marquee-track');
     if (!track) return;
     if (marquee.dataset.duration) {
       track.style.setProperty('--marquee-duration', marquee.dataset.duration + 's');
     }
-    if (reduceMotion) return; // keep one set; CSS turns the strip into a manual scroll
     Array.prototype.slice.call(track.children).forEach(function (node) {
       var clone = node.cloneNode(true);
       clone.setAttribute('aria-hidden', 'true');

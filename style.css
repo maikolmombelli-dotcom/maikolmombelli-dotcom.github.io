@@ -127,10 +127,8 @@
   .marquee:hover .marquee-track,
   .marquee:focus-within .marquee-track { animation-play-state: paused; }
   @keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-  @media (prefers-reduced-motion: reduce) {
-    .marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
-    .marquee-track { animation: none; }
-  }
+  /* The carousel keeps scrolling even when the OS "reduce motion" setting is on,
+     since it is the page's main interactive feature. It still pauses on hover/focus. */
 
   /* ---------- STACK LOGOS (infinite marquee) ---------- */
   .stack { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 44px 0; }
@@ -226,6 +224,10 @@
     .reveal { opacity: 1; transform: none; }
     .hero-stagger > * { opacity: 1; transform: none; }
     h1, .proj-index, .contact .big a { animation: none; }
+    /* Exception: the carousels are the page's core feature, so keep them scrolling. */
+    .marquee-track { animation: marquee-scroll var(--marquee-duration, 36s) linear infinite !important; }
+    .marquee:hover .marquee-track,
+    .marquee:focus-within .marquee-track { animation-play-state: paused !important; }
   }
 
   /* ---------- RESPONSIVE ---------- */
