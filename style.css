@@ -35,6 +35,7 @@
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  section, #top { scroll-margin-top: 76px; }
   body {
     background: var(--bg);
     color: var(--ink);
@@ -79,6 +80,7 @@
   .brand { font-weight: 800; font-size: 18px; letter-spacing: .02em; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
   .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--grad); display: inline-block; box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent); }
   .nav-links { display: flex; align-items: center; gap: 30px; }
+  .menu { display: flex; align-items: center; gap: 30px; }
   .nav-links a { font-size: 14px; color: var(--ink-soft); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; position: relative; transition: color .25s ease; }
   .nav-links a:hover { color: var(--ink); }
   .nav-links a::after { content: ""; position: absolute; left: 0; bottom: -4px; height: 2px; width: 0; background: var(--grad); transition: width .3s ease; }
@@ -86,6 +88,10 @@
   .toggle { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); cursor: pointer; display: grid; place-items: center; color: var(--ink); transition: transform .4s cubic-bezier(.34,1.56,.64,1), border-color .3s, box-shadow .3s; }
   .toggle:hover { transform: rotate(20deg); border-color: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 14%, transparent); }
   .toggle svg { width: 18px; height: 18px; }
+  .menu-toggle { display: none; }
+  .icon-close { display: none; }
+  .menu-open .icon-menu { display: none; }
+  .menu-open .icon-close { display: block; }
   .icon-moon { display: none; }
   [data-theme="dark"] .icon-sun { display: none; }
   [data-theme="dark"] .icon-moon { display: block; }
@@ -127,8 +133,6 @@
   .marquee:hover .marquee-track,
   .marquee:focus-within .marquee-track { animation-play-state: paused; }
   @keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-  /* The carousel keeps scrolling even when the OS "reduce motion" setting is on,
-     since it is the page's main interactive feature. It still pauses on hover/focus. */
 
   /* ---------- STACK LOGOS (infinite marquee) ---------- */
   .stack { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 44px 0; }
@@ -172,16 +176,29 @@
   .feature-list li { list-style: none; display: flex; gap: 10px; font-size: 15.5px; color: var(--ink-soft); }
   .feature-list li::before { content: "→"; color: var(--accent); font-weight: 800; }
 
-  /* ---------- GALLERY (infinite marquee) ---------- */
-  .gallery.shot-marquee { padding: 16px 0 28px; }
-  .gallery .marquee-track { align-items: flex-start; }
-  .shot { flex: 0 0 auto; width: 210px; margin-right: 18px; cursor: zoom-in; }
-  .shot img { width: 100%; display: block; border-radius: 22px; box-shadow: var(--shadow); transition: transform .35s cubic-bezier(.2,.7,.3,1); }
-  .shot:hover img { transform: translateY(-8px) scale(1.015); }
-  .shot .cap { font-size: 12px; font-weight: 700; color: var(--ink-faint); text-align: center; margin-top: 12px; letter-spacing: .06em; text-transform: uppercase; }
+  .proj-role { margin-top: 14px; font-size: 13px; font-weight: 600; color: var(--ink-faint); letter-spacing: .03em; }
+  .proj-note { margin-top: 18px; font-size: 13px; font-weight: 600; color: var(--ink-faint); }
+  .progress { display: flex; flex-wrap: wrap; gap: 8px; max-width: 680px; margin-top: 22px; list-style: none; }
+  .progress li { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; padding: 7px 13px; border-radius: 100px; border: 1.5px solid var(--line); color: var(--ink-soft); }
+  .progress li::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 2px solid currentColor; flex: 0 0 auto; }
+  .progress .done { color: #12996e; border-color: color-mix(in srgb, #18c08a 40%, transparent); }
+  .progress .done::before { background: currentColor; }
+  .progress .wip { color: #c47e10; border-color: color-mix(in srgb, #f5a524 45%, transparent); }
+  .progress .wip::before { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+  .progress .todo { color: var(--ink-faint); }
+  [data-theme="dark"] .progress .done { color: #3ddba6; }
+  [data-theme="dark"] .progress .wip { color: #f7bd55; }
+
+  /* ---------- DIAGRAM + LIGHTBOX ---------- */
+  .diagram { max-width: 680px; }
+  .zoom { display: block; width: 100%; padding: 10px; border: 1px solid var(--line); border-radius: 18px; background: #fff; box-shadow: var(--shadow-sm); cursor: zoom-in; transition: transform .35s cubic-bezier(.2,.7,.3,1), box-shadow .35s ease; }
+  .zoom:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .zoom:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .zoom img { display: block; width: 100%; height: auto; border-radius: 10px; }
+  .diagram .cap { font-size: 12px; font-weight: 700; color: var(--ink-faint); text-align: center; margin-top: 12px; letter-spacing: .06em; text-transform: uppercase; }
   .lightbox { position: fixed; inset: 0; z-index: 100; display: none; background: color-mix(in srgb, #05070f 86%, transparent); backdrop-filter: blur(8px); place-items: center; padding: 32px; animation: fade .3s ease; }
   .lightbox.open { display: grid; }
-  .lightbox img { max-height: 86vh; max-width: 92vw; border-radius: 24px; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .lightbox img { max-height: 86vh; max-width: 92vw; border-radius: 16px; background: #fff; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
   .lightbox .close { position: absolute; top: 24px; right: 24px; width: 46px; height: 46px; border-radius: 50%; border: none; background: #fff; color: #0c1024; cursor: pointer; font-size: 22px; }
   @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
@@ -224,10 +241,8 @@
     .reveal { opacity: 1; transform: none; }
     .hero-stagger > * { opacity: 1; transform: none; }
     h1, .proj-index, .contact .big a { animation: none; }
-    /* Exception: the carousels are the page's core feature, so keep them scrolling. */
-    .marquee-track { animation: marquee-scroll var(--marquee-duration, 36s) linear infinite !important; }
-    .marquee:hover .marquee-track,
-    .marquee:focus-within .marquee-track { animation-play-state: paused !important; }
+    .marquee { -webkit-mask-image: none; mask-image: none; }
+    .marquee-track { width: auto; flex-wrap: wrap; justify-content: center; row-gap: 28px; }
   }
 
   /* ---------- RESPONSIVE ---------- */
@@ -235,7 +250,14 @@
     body { font-size: 17px; }
     .wrap { padding: 0 22px; }
     .nav-inner { padding: 16px 22px; }
-    .menu-link { display: none !important; }
+    .menu-toggle { display: grid; }
+    .nav-links { gap: 10px; }
+    .menu { display: none; position: absolute; top: 100%; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0;
+      padding: 8px 22px 16px; background: var(--bg); border-bottom: 1px solid var(--line); box-shadow: var(--shadow-sm); }
+    .menu-open .menu { display: flex; }
+    .menu a { padding: 14px 0; font-size: 15px; border-bottom: 1px solid var(--line); }
+    .menu a:last-child { border-bottom: none; }
+    .menu a::after { display: none; }
     .avail { display: none; }
     header { padding: 70px 0 56px; }
     .about-grid { grid-template-columns: 1fr; gap: 32px; }

@@ -1,28 +1,58 @@
-/* Apply the visitor's preferred color scheme before first paint to avoid a flash. */
+/* Apply the saved theme (or the visitor's preferred color scheme) before first paint to avoid a flash. */
+var THEME_KEY = 'theme';
 (function () {
-  try {
-    var dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  } catch (e) {}
+  var theme = null;
+  try { theme = localStorage.getItem(THEME_KEY); } catch (e) {}
+  if (theme !== 'dark' && theme !== 'light') {
+    try {
+      theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } catch (e) { theme = 'light'; }
+  }
+  document.documentElement.setAttribute('data-theme', theme);
 })();
 
 /* Wire up interactions once the DOM is ready. */
 document.addEventListener('DOMContentLoaded', function () {
-  // Manual light/dark toggle.
+  // Manual light/dark toggle, remembered across visits.
   var themeToggle = document.getElementById('themeToggle');
   if (themeToggle) {
     themeToggle.addEventListener('click', function () {
       var html = document.documentElement;
-      html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    });
+  }
+
+  // Mobile menu: open/close, and close again after picking a link.
+  var nav = document.getElementById('nav');
+  var menuToggle = document.getElementById('menuToggle');
+  var menu = document.getElementById('menu');
+  if (nav && menuToggle && menu) {
+    var setMenu = function (open) {
+      nav.classList.toggle('menu-open', open);
+      menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    };
+    menuToggle.addEventListener('click', function () {
+      setMenu(!nav.classList.contains('menu-open'));
+    });
+    menu.addEventListener('click', function (e) {
+      if (e.target.closest('a')) setMenu(false);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && nav.classList.contains('menu-open')) {
+        setMenu(false);
+        menuToggle.focus();
+      }
     });
   }
 
   // Add a border to the nav once the page is scrolled.
-  var nav = document.getElementById('nav');
   if (nav) {
     window.addEventListener('scroll', function () {
       nav.classList.toggle('scrolled', window.scrollY > 12);
-    });
+    }, { passive: true });
   }
 
   // Reveal elements as they enter the viewport.
@@ -33,13 +63,15 @@ document.addEventListener('DOMContentLoaded', function () {
         io.unobserve(e.target);
       }
     });
-  }, { threshold: 0.12 });
+  }, { threshold: 0, rootMargin: '0px 0px -10% 0px' }); // tall blocks (projects) start revealing as soon as they enter
   document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
 
   // Infinite marquees: clone each track's items so the loop is seamless.
+  // With "reduce motion" on, the marquee stays still (CSS), so no clones are needed.
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   document.querySelectorAll('[data-marquee]').forEach(function (marquee) {
     var track = marquee.querySelector('.marquee-track');
-    if (!track) return;
+    if (!track || reduceMotion) return;
     if (marquee.dataset.duration) {
       track.style.setProperty('--marquee-duration', marquee.dataset.duration + 's');
     }
@@ -51,22 +83,41 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Lightbox for project screenshots (delegated so cloned marquee slides work too).
+  // Lightbox for zoomable images (diagrams, screenshots).
   var lb = document.getElementById('lightbox');
   var lbImg = document.getElementById('lbImg');
-  if (lb && lbImg) {
-    document.addEventListener('click', function (e) {
-      var img = e.target.closest && e.target.closest('.shot img');
-      if (!img) return;
-      lbImg.src = img.src;
+  var lbClose = document.getElementById('lbClose');
+  if (lb && lbImg && lbClose) {
+    var opener = null;
+    var openLb = function (img, trigger) {
+      lbImg.src = img.currentSrc || img.src;
       lbImg.alt = img.alt;
+      opener = trigger;
+      lb.hidden = false;
       lb.classList.add('open');
-    });
+      document.body.style.overflow = 'hidden';
+      lbClose.focus();
+    };
+    var closeLb = function () {
+      if (lb.hidden) return;
+      lb.classList.remove('open');
+      lb.hidden = true;
+      document.body.style.overflow = '';
+      if (opener) opener.focus();
+    };
 
-    var closeLb = function () { lb.classList.remove('open'); };
-    var lbClose = document.getElementById('lbClose');
-    if (lbClose) lbClose.addEventListener('click', closeLb);
+    document.addEventListener('click', function (e) {
+      var trigger = e.target.closest && e.target.closest('.zoom');
+      if (!trigger) return;
+      var img = trigger.querySelector('img');
+      if (img) openLb(img, trigger);
+    });
+    lbClose.addEventListener('click', closeLb);
     lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLb(); });
+    document.addEventListener('keydown', function (e) {
+      if (lb.hidden) return;
+      if (e.key === 'Escape') closeLb();
+      if (e.key === 'Tab') { e.preventDefault(); lbClose.focus(); } // keep focus inside the dialog
+    });
   }
 });
