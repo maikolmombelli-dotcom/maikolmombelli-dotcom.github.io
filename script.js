@@ -82,42 +82,4 @@ document.addEventListener('DOMContentLoaded', function () {
       track.appendChild(clone);
     });
   });
-
-  // Lightbox for zoomable images (diagrams, screenshots).
-  var lb = document.getElementById('lightbox');
-  var lbImg = document.getElementById('lbImg');
-  var lbClose = document.getElementById('lbClose');
-  if (lb && lbImg && lbClose) {
-    var opener = null;
-    var openLb = function (img, trigger) {
-      lbImg.src = img.currentSrc || img.src;
-      lbImg.alt = img.alt;
-      opener = trigger;
-      lb.hidden = false;
-      lb.classList.add('open');
-      document.body.style.overflow = 'hidden';
-      lbClose.focus();
-    };
-    var closeLb = function () {
-      if (lb.hidden) return;
-      lb.classList.remove('open');
-      lb.hidden = true;
-      document.body.style.overflow = '';
-      if (opener) opener.focus();
-    };
-
-    document.addEventListener('click', function (e) {
-      var trigger = e.target.closest && e.target.closest('.zoom');
-      if (!trigger) return;
-      var img = trigger.querySelector('img');
-      if (img) openLb(img, trigger);
-    });
-    lbClose.addEventListener('click', closeLb);
-    lb.addEventListener('click', function (e) { if (e.target === lb) closeLb(); });
-    document.addEventListener('keydown', function (e) {
-      if (lb.hidden) return;
-      if (e.key === 'Escape') closeLb();
-      if (e.key === 'Tab') { e.preventDefault(); lbClose.focus(); } // keep focus inside the dialog
-    });
-  }
 });
