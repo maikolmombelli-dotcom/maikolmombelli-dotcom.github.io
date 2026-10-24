@@ -189,6 +189,20 @@
   [data-theme="dark"] .progress .done { color: #3ddba6; }
   [data-theme="dark"] .progress .wip { color: #f7bd55; }
 
+  /* ---------- SCREENSHOTS + LIGHTBOX ---------- */
+  .shots { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 16px; margin-top: 28px; }
+  .shot figcaption { font-size: 11px; font-weight: 700; color: var(--ink-faint); text-align: center; margin-top: 10px; letter-spacing: .06em; text-transform: uppercase; }
+  .zoom { display: block; width: 100%; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow-sm); cursor: zoom-in; transition: transform .3s cubic-bezier(.2,.7,.3,1), box-shadow .3s ease; }
+  .zoom:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .zoom:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  .zoom img { display: block; width: 100%; aspect-ratio: 16 / 10; height: auto; object-fit: cover; object-position: top; }
+  .lightbox { position: fixed; inset: 0; z-index: 100; display: none; background: color-mix(in srgb, #05070f 86%, transparent); backdrop-filter: blur(8px); place-items: center; padding: 32px; animation: fade .3s ease; }
+  .lightbox.open { display: grid; }
+  .lightbox img { max-height: 86vh; max-width: 92vw; border-radius: 16px; background: #fff; box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+  .lightbox .close { position: absolute; top: 24px; right: 24px; width: 46px; height: 46px; border-radius: 50%; border: none; background: #fff; color: #0c1024; cursor: pointer; font-size: 22px; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+
   /* ---------- ABOUT ---------- */
   .about-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 64px; align-items: start; }
   .about-body p { font-size: 19px; color: var(--ink-soft); margin-bottom: 20px; line-height: 1.7; }
@@ -249,6 +263,7 @@
     header { padding: 70px 0 56px; }
     .about-grid { grid-template-columns: 1fr; gap: 32px; }
     .feature-list { grid-template-columns: 1fr; }
+    .shots { gap: 12px; }
     section { padding: 76px 0; }
     .cta-row { gap: 12px; }
   }
